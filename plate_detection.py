@@ -127,11 +127,18 @@ class CPlateDetection:
 
 
     # Detect plate in image
-    def plate_detection(self, img): 
-        # Resize image: width = 400, height = (original_height * 400 / orignal_width
+    '''
+    Input: 
+        image: BGR image
+        step_by_step: Show step by step works (default = False)
+    Output:
+        plate region
+    '''
+    def plate_detection(self, img, step_by_step = False): 
+        # Resize image: width = 600, height = (original_height * 600 / orignal_width
         # INTER_AREA mode: Resampling using pixel area relation
         height, width = img.shape[:2]
-        img = cv2.resize(img, (400, round(height*400/width)), interpolation = cv2.INTER_AREA)
+        img = cv2.resize(img, (600, round(height*600/width)), interpolation = cv2.INTER_AREA)
 
         # Convert to grayscale
         grayImg = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
@@ -141,18 +148,19 @@ class CPlateDetection:
         # Step 2: Find vertical edges
         sobelX = cv2.Sobel(blurImg, cv2.CV_8UC1, dx=1, dy=0, ksize = 3, scale = 1, delta = 0, borderType = cv2.BORDER_DEFAULT)
 
-        # plt.figure()
-        # plt.imshow(sobelX, cmap = 'gray', interpolation="bicubic")
-        # plt.title("Vertical sobel"); plt.axis("off")
+        if step_by_step:
+            plt.figure()
+            plt.imshow(sobelX, cmap = 'gray', interpolation="bicubic")
+            plt.title("Vertical sobel"); plt.axis("off")
 
         # Step 3: Threshold sobelX with Otsu algorithm (Otsu will automaticly find optimal threshold value)
-        ret, thresholdImg = cv2.threshold(
-            sobelX, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+        ret, thresholdImg = cv2.threshold(sobelX, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
 
-        plt.figure()
-        plt.imshow(thresholdImg, cmap='gray', interpolation="bicubic")
-        plt.title("Threshold image by Otsu algorithm")
-        plt.axis("off")
+        if step_by_step:
+            plt.figure()
+            plt.imshow(thresholdImg, cmap='gray', interpolation="bicubic")
+            plt.title("Threshold image by Otsu algorithm")
+            plt.axis("off")
 
         # Step 4: Apply morphological operation to remove blank spaces between each vertical sobel
         # First It do dilation followed by Erosion then to remove small holes inside foreground object
@@ -160,10 +168,11 @@ class CPlateDetection:
         rect_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (17, 3))
         morphImg = cv2.morphologyEx(thresholdImg, cv2.MORPH_CLOSE, kernel = rect_kernel)
 
-        plt.figure()
-        plt.imshow(morphImg, cmap='gray', interpolation="bicubic")
-        plt.title("Morphological image")
-        plt.axis("off")
+        if step_by_step:
+            plt.figure()
+            plt.imshow(morphImg, cmap='gray', interpolation="bicubic")
+            plt.title("Morphological image")
+            plt.axis("off")
 
         # When we do morphological operation, we now have regions that maybe contain plate.
         # But most of them don't contain plate, we need to refine them.
@@ -181,33 +190,49 @@ class CPlateDetection:
                                             cv2.RETR_EXTERNAL,  # Extract external contours
                                             cv2.CHAIN_APPROX_NONE)  # get all points of each contour
         
-        # Draw all contours
-        """Input:
-            source image: draw contour inside this img
-            contours: list of contour points
-            -1: mean draw all contours (or individual contour)
-            color and thickness
-        """
-        # cv2.drawContours(img, contours, -1, (0, 255, 0), 2)
+        if step_by_step:
+            # Draw all contours
+            """Input:
+                source image: draw contour inside this img
+                contours: list of contour points
+                -1: mean draw all contours (or individual contour)
+                color and thickness
+            """
+            copy_img = np.copy(img)
+            cv2.drawContours(copy_img, contours, -1, (0, 255, 0), 2)
 
-        # plt.figure()
-        # plt.imshow(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
-        # plt.title("Contours image")
-        # plt.axis("off")
+            plt.figure()
+            plt.imshow(cv2.cvtColor(copy_img, cv2.COLOR_BGR2RGB))
+            plt.title("Contours")
+            plt.axis("off")
 
         
 
         # Extract and refine minimal rect area (rotated object)
         rect_list = self.extract_and_refine_bounding_rect(contours)
         
+        if step_by_step:
+            copy_img = np.copy(img)
+            # Draw rects
+            for rect in rect_list:
+                box = cv2.boxPoints(rect)
+                box = np.int0(box)
+                cv2.drawContours(copy_img, [box], 0, (0, 255, 0), 2)
+
+            plt.figure()
+            plt.imshow(cv2.cvtColor(copy_img, cv2.COLOR_BGR2RGB))
+            plt.title("Rotated rectangles (minimal rectangles)")
+            plt.axis("off")
+
         for cnt in contours:
             x, y, w, h = cv2.boundingRect(cnt)
             plateImg = np.copy(img[y:y+h, x:x+w])
 
-            # plt.figure()
-            # plt.imshow(cv2.cvtColor(plateImg, cv2.COLOR_BGR2RGB))
-            # plt.title("Plates")
-            # plt.axis("off")
+            if step_by_step:
+                plt.figure()
+                plt.imshow(cv2.cvtColor(plateImg, cv2.COLOR_BGR2RGB))
+                plt.title("Possible plates")
+                plt.axis("off")
 
             # Process image with some stuffs: dilate, threshold, contours and verify size to refine plate image
             found_plate, plat_rect = self.process_plate_image(plateImg)
@@ -219,7 +244,7 @@ class CPlateDetection:
                 # Display plate
                 plt.figure()
                 plt.imshow(cv2.cvtColor(found_plate, cv2.COLOR_BGR2RGB))
-                plt.title("Plates")
+                plt.title("Correct plates")
                 plt.axis("off")
 
                 # ----------------------Now we use Tesseract to recognize charactor in plate-----------------------
@@ -242,26 +267,17 @@ class CPlateDetection:
                 # print(plate_text)
 
 
-        # Draw rects
-        # for rect in rect_list:
-        #     box = cv2.boxPoints(rect)
-        #     box = np.int0(box)
-        #     cv2.drawContours(img, [box], 0, (0, 255, 0), 2)
-
-        # plt.figure()
-        # plt.imshow(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
-        # plt.title("Rotated rectangles")
-        # plt.axis("off")
+        
 
 # Measure time
 e1 = cv2.getTickCount()        
 
 # Read image
-img = cv2.imread(".\\test_images\\9773BNB.jpg")  # r".\Bike_back\1.jpg"
+img = cv2.imread(".\\test_images\\3266CNT.JPG")  # r".\Bike_back\1.jpg"
 
 # Declare CPlateDetection obj
 plateDetector = CPlateDetection()
-plateDetector.plate_detection(img)
+plateDetector.plate_detection(img, step_by_step = False)
 
 
 # # Display image
