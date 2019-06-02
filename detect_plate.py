@@ -218,7 +218,7 @@ def character_recognition(found_plate, plate_box, img):
     character_img = character_separation(mask, contours, threshPlate)
 
     plate_text = ""
-    config = ("-l eng --oem 1 --psm 7")
+    config = ("-l eng --oem 1 --psm 11")
     for i, charImg in enumerate(character_img):
         # Store image in PIL image format
         # pilImg = Image.fromarray(charImg)
@@ -228,7 +228,7 @@ def character_recognition(found_plate, plate_box, img):
         openingImg = cv2.morphologyEx(charImg, cv2.MORPH_OPEN, kernel)
 
         cv2.imshow("Character " + str(i), openingImg)
-
+        
         # Recognize text with Tesseract
         c = image_to_string(openingImg, config = config)
         c = plate_text.replace(" ", "") # Remove space
