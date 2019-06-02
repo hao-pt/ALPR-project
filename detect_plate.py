@@ -154,10 +154,19 @@ def preprocess_image(found_plate, plate_box):
     cv2.imshow("Mask inverse", mask)
 
     contours, _ = cv2.findContours(mask, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE) # get only corners of each contour
+    
+    # Filter contour (just get contour of character)
+    refine_contours = []
+    for cnt in contours:
+        x,y,w,h = cv2.boundingRect(cnt)
+        
+        if 300 <= w*h <= 1250 and w <= h:
+            refine_contours.append(cnt)
+            
     cv2.drawContours(copy_plate, contours, -1, (0, 255, 0), 2)
     cv2.imshow("Mask contour", copy_plate)
 
-    return contours, mask, threshPlate
+    return refine_contours, mask, threshPlate
 
 def character_separation(mask, contours, threshPlate):
     character_img = []
@@ -165,9 +174,6 @@ def character_separation(mask, contours, threshPlate):
         # Get bounding box
         (x, y, w, h) = cv2.boundingRect(cnt)
         
-        if not(300 <= w*h <= 1250 and w <= h):
-            continue
-
         # character roi
         character_roi = np.copy(mask[y:y+h, x:x+w])
         character_roi = cv2.resize(character_roi, None, fx = 0.75, fy = 0.75, interpolation = cv2.INTER_AREA)
@@ -195,6 +201,18 @@ def character_recognition(found_plate, plate_box, img):
     
     # Sort contours base on boundingRect position x
     contours = sorted(contours, key = lambda cnt: cv2.boundingRect(cnt)[0])
+
+    for i in range(0, len(contours) - 1, 2):
+        x1, y1, _, _ = cv2.boundingRect(contours[i])
+        j = i + 1
+        x2, y2, _, _ = cv2.boundingRect(contours[j])
+        if not(x1 < x2 and y1 < y2):
+            t = contours[i]
+            contours[i] = contours[j]
+            contours[j] = t
+
+    for cnt in contours:          
+        print(cv2.boundingRect(cnt))            
 
     # Separate character in plate
     character_img = character_separation(mask, contours, threshPlate)
@@ -240,7 +258,7 @@ def character_recognition(found_plate, plate_box, img):
 cascade = cv2.CascadeClassifier(r"E:\K16\Junior\TGMT\ALPR-project\GreenParking_num-3000-LBP_mode-ALL_w-30_h-20.xml")
 
 # Load image
-img = cv2.imread(r"E:\K16\Junior\TGMT\ALPR-project\Bike_back\26.jpg")
+img = cv2.imread(r"E:\K16\Junior\TGMT\ALPR-project\Bike_back\8.jpg")
 
 # Resize image
 width = 600
