@@ -12,6 +12,9 @@ def floodFill(rects, plate_image):
     # Get shape of plate_image
     Height, Width = plate_image.shape[:2]
 
+    # Mask need 2 extra pixels
+    mask = np.zeros((Height+2, Width+2), np.uint8)
+
     for i, rect in enumerate(rects):
         # Take advantage of white background
         # Use floodFill to retrieve more precise contour box
@@ -33,7 +36,7 @@ def floodFill(rects, plate_image):
         connectivity = 4 # Fours neighbours floodFill
         loDiff = 30; upDiff = 30
         newMaskVal = 255
-        numSeeds = 200
+        numSeeds = 250
 
         # Create flags
         # cv2.FLOODFILL_FIXED_RANGE: if set, the difference between the current pixel and seed pixel is considered (neighbor pixels too)
@@ -136,15 +139,11 @@ def preprocess_image(found_plate, plate_box):
     for i in range(len(contours)):
         # Bouding rect contain: [center (x, y), width&height (w,h), angle)
         rect = cv2.minAreaRect(contours[i])
-        
-        if rect[1][0] == 0 or rect[1][1] == 0 or rect[1][0] < 100 or rect[1][1] < 80:
+        if rect[1][0] == 0 or rect[1][1] == 0 or rect[1][0] < 80 or rect[1][1] < 80:
             continue
 
         rects.append(rect)
-    
-    # # Sort contours base on boundingRect position x
-    # contours = sorted(contours, key = lambda cnt: cv2.boundingRect(cnt)[0])
-    
+        
     # Draw contour
     cv2.drawContours(found_plate, contours, -1, (0, 255, 0), 2)
     cv2.imshow("Contours", found_plate)
@@ -170,14 +169,14 @@ def character_separation(mask, contours, threshPlate):
             continue
 
         # character roi
-        character_roi = np.copy(threshPlate[y:y+h, x:x+w])
-        character_roi = cv2.resize(character_roi, None, fx = 0.5, fy = 0.5, interpolation = cv2.INTER_AREA)
+        character_roi = np.copy(mask[y:y+h, x:x+w])
+        character_roi = cv2.resize(character_roi, None, fx = 0.75, fy = 0.75, interpolation = cv2.INTER_AREA)
         # Make border: 10 extra with constant value = 255
         character_roi = cv2.copyMakeBorder(character_roi, 5, 5, 5, 5, cv2.BORDER_CONSTANT, value = 255)
 
         # Threshold it
         charImg = cv2.GaussianBlur(character_roi, (3,3), 0)
-        charImg = cv2.adaptiveThreshold(charImg, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 13, 5)
+        charImg = cv2.adaptiveThreshold(charImg, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 5, 2)
         
         # Push to list
         character_img.append(charImg)
@@ -190,25 +189,36 @@ def character_separation(mask, contours, threshPlate):
 
     return character_img
     
-
-
 def character_recognition(found_plate, plate_box, img):
     # Preprocess plate image to find contours of each character in plate
     contours, mask, threshPlate = preprocess_image(found_plate, plate_box)
+    
+    # Sort contours base on boundingRect position x
+    contours = sorted(contours, key = lambda cnt: cv2.boundingRect(cnt)[0])
+
     # Separate character in plate
     character_img = character_separation(mask, contours, threshPlate)
 
     plate_text = ""
-    for charImg in character_img:
+    config = ("-l eng --oem 1 --psm 7")
+    for i, charImg in enumerate(character_img):
         # Store image in PIL image format
-        pilImg = Image.fromarray(charImg)
+        # pilImg = Image.fromarray(charImg)
+        
+        # Apply dilation operation:
+        kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (2, 2))
+        openingImg = cv2.morphologyEx(charImg, cv2.MORPH_OPEN, kernel)
+
+        cv2.imshow("Character " + str(i), openingImg)
 
         # Recognize text with Tesseract
-        c = image_to_string(pilImg, lang = "eng")
+        c = image_to_string(openingImg, config = config)
         c = plate_text.replace(" ", "") # Remove space
 
         if len(c) == 0:
             c = "?"
+        if len(c) > 0:
+            c = c[0]
 
         plate_text += c
 
@@ -230,7 +240,7 @@ def character_recognition(found_plate, plate_box, img):
 cascade = cv2.CascadeClassifier(r"E:\K16\Junior\TGMT\ALPR-project\GreenParking_num-3000-LBP_mode-ALL_w-30_h-20.xml")
 
 # Load image
-img = cv2.imread(r"E:\K16\Junior\TGMT\ALPR-project\Bike_back\17.jpg")
+img = cv2.imread(r"E:\K16\Junior\TGMT\ALPR-project\Bike_back\26.jpg")
 
 # Resize image
 width = 600
