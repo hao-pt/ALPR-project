@@ -295,7 +295,7 @@ class CPlateDetection:
                 # Convert to gray image
                 grayPlate = cv2.cvtColor(found_plate, cv2.COLOR_BGR2GRAY)
                 # Blur image
-                blurPlate = cv2.GaussianBlur(grayImg, (5, 5), 1.0) # Remove noise
+                blurPlate = cv2.GaussianBlur(grayPlate, (5, 5), 1.0) # Remove noise
                 # Apply closing operation:  Dilation followed by Erosion to remove noise and hole inside object
                 kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (1, 1))
                 closingImg = cv2.morphologyEx(blurPlate, cv2.MORPH_CLOSE, kernel)
@@ -303,11 +303,16 @@ class CPlateDetection:
                 # Apply threshold to get image with only b&w (binarization)
                 _, threshPlate = cv2.threshold(closingImg, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
 
+                plt.figure()
+                plt.imshow(threshPlate, cmap='gray', interpolation="bicubic")
+                plt.title("Threshold plate by Otsu algorithm")
+                plt.axis("off")
+
                 # Store image in PIL image format
                 pilImg = Image.fromarray(threshPlate)
 
                 # Recognize text with Tesseract
-                plate_text = image_to_string(found_plate, lang = "eng")
+                plate_text = image_to_string(pilImg, lang = "eng")
                 plate_text = plate_text.replace(" ", "") # Remove space
 
                 if len(plate_text) == 0:
