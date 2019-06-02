@@ -99,8 +99,7 @@ def floodFill(rects, plate_image):
     # cv2.imshow("Crop", crop_img)
     return mask
 
-
-def character_recognition(found_plate, plate_box, img):
+def preprocess_image(found_plate, plate_box):
     # Resize image: Scale down a half
     found_plate = cv2.resize(found_plate, None, fx = 0.5, fy = 0.5, interpolation = cv2.INTER_AREA)
     cv2.imshow("Scale down a half", found_plate)
@@ -131,7 +130,6 @@ def character_recognition(found_plate, plate_box, img):
 
     # Find contours of each character and extract it
     contours, _ = cv2.findContours(threshPlate.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE) # get only corners of each contour
-    print(contours[1].shape)
 
     # Get rotated rectangle of each contours
     rects = []
@@ -160,31 +158,50 @@ def character_recognition(found_plate, plate_box, img):
     cv2.drawContours(copy_plate, contours, -1, (0, 255, 0), 2)
     cv2.imshow("Mask contour", copy_plate)
 
-    plate_text = ""
+    return contours, mask, threshPlate
+
+def character_separation(mask, contours, threshPlate):
+    character_img = []
     for i, cnt in enumerate(contours):
         # Get bounding box
         (x, y, w, h) = cv2.boundingRect(cnt)
         
-        if not(450 <= w*h <= 1250 and w <= h):
+        if not(300 <= w*h <= 1250 and w <= h):
             continue
-
-        print(w, h)
 
         # character roi
         character_roi = np.copy(threshPlate[y:y+h, x:x+w])
-        character_roi = cv2.resize(character_roi, None, fx = 0.75, fy = 0.75, interpolation = cv2.INTER_AREA)
+        character_roi = cv2.resize(character_roi, None, fx = 0.5, fy = 0.5, interpolation = cv2.INTER_AREA)
         # Make border: 10 extra with constant value = 255
-        character_roi = cv2.copyMakeBorder(character_roi, 10, 10, 10, 10, cv2.BORDER_CONSTANT, value = 255)
+        character_roi = cv2.copyMakeBorder(character_roi, 5, 5, 5, 5, cv2.BORDER_CONSTANT, value = 255)
 
+        # Threshold it
+        charImg = cv2.GaussianBlur(character_roi, (3,3), 0)
+        charImg = cv2.adaptiveThreshold(charImg, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 13, 5)
+        
+        # Push to list
+        character_img.append(charImg)
 
-        cv2.imshow("{:d}".format(i), character_roi)
+        cv2.imshow("{:d}".format(i), charImg)
 
         # Draw bounding box of each character
         rect = cv2.rectangle(mask, (x, y), (x + w, y + h), (0, 255, 0), 2)
         cv2.imshow('rect', rect)
 
+    return character_img
+    
+
+
+def character_recognition(found_plate, plate_box, img):
+    # Preprocess plate image to find contours of each character in plate
+    contours, mask, threshPlate = preprocess_image(found_plate, plate_box)
+    # Separate character in plate
+    character_img = character_separation(mask, contours, threshPlate)
+
+    plate_text = ""
+    for charImg in character_img:
         # Store image in PIL image format
-        pilImg = Image.fromarray(character_roi)
+        pilImg = Image.fromarray(charImg)
 
         # Recognize text with Tesseract
         c = image_to_string(pilImg, lang = "eng")
@@ -207,8 +224,6 @@ def character_recognition(found_plate, plate_box, img):
 
     cv2.imshow("License plate number recognition", copy_img)
     
-    
-
     print(plate_text)
 
 # Load cascade model
