@@ -10,7 +10,7 @@ class CharactersRecognition:
         self.init = 0
 
 
-    def recognize_characters(self, listOfPlates):
+    def recognize_characters(self, listOfPlates, src_img):
         for (i, found_plate) in enumerate(listOfPlates):
             '''if i == 1:
                 break'''
@@ -67,11 +67,22 @@ class CharactersRecognition:
                     if len(char) > 0:
                         char = char[0]
                     char = char.replace(" ", "")
-                    print(char,' ',x)
+                    print(char,' ', x)
                     plateNumber += char
                 print(plateNumber)
                 
+
+                Height, Weight = src_img.shape[:2]
+                # Specify font
+                font = cv2.FONT_HERSHEY_SIMPLEX
+                # draw text
+                cv2.putText(src_img, plateNumber, (int(Weight/2) - 100, int(Height/2)), font, 2, (0,0,255), 2, cv2.LINE_AA)
                 
+                plt.figure()
+                plt.imshow(cv2.cvtColor(src_img, cv2.COLOR_BGR2RGB))
+                plt.title("Plate number recognition")
+                plt.axis("off")
+
                 #print(plate_text)
                 return plateNumber
 
