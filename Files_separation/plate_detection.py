@@ -417,7 +417,7 @@ class PlateDetection:
 
         # return listOfPlates
 
-        return []
+        return [], []
 
         
 
