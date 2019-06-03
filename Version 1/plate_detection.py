@@ -231,7 +231,7 @@ class PlateDetection:
 
                 eqhist_img_list.append(eqhist_img)
                 plate_img_list.append(resized_img)
-
+                
         return eqhist_img_list, plate_img_list
 
     def process_plate_image(self, plateImg):

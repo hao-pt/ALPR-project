@@ -90,7 +90,7 @@ def main(args):
     # Plate Detection
     plateDetector = plate_detection.PlateDetection()
     eqhist_plates, plate_images = plateDetector.detect_plates(img, step_by_step = isShow)
-
+    
     # List of correct plate
     listCorrectPlate = []
 
@@ -102,6 +102,9 @@ def main(args):
     # Characters Recognition
     charactersRecognitor = chars_recognition.CharactersRecognition()
     plateNumbers = charactersRecognitor.recognize_characters(listCorrectPlate, img.copy())
+    
+    # plateNumbers = charactersRecognitor.recognize_characters(plate_images, img.copy())
+
 
     # End time
     e2 = cv2.getTickCount()
