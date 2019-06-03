@@ -1,0 +1,12 @@
+{
+  "type": "service_account",
+  "project_id": "alpr-project-241706",
+  "private_key_id": "13212704d9b0be4ad61e9db36bd85c3e87fa2a1b",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQCkz/PHWUzyixXR\nEx8ToDZ7cN7ODqYXfZr0hHP8LrDosNFfJlIP5FJvkOi2CvnVuUNjbAdOExiEiupY\nplcFd7y0WpSOIFuF7FUqfFCHskSRQAuhm7w2hxxc60jKnIZKPgHM0/UjY3YPVTmp\nAdike0Ccy3uGU6W9i/3q/EC1PNgvA99I+5sfZXXHUiTM4EMHM2+rO93TvmL6BKUf\nvU3r5I1VBP11vdls4pX17vrATuTAVdWdF21/1xESeOe4wr+oe8fZtRXrr6hx31Xw\nAbPDGf6kx87AH8fzx7B+ctpBPCCpQWWcfgV2JLkKrRV4oZIXnib6CNFV+JGtsMyR\nNcq0TW6bAgMBAAECggEAF7eRNjPEnfaj6hVdWH6quHLSrUZwYlsB7IQPCNBTRvkC\n+DVUg9LwhfuNcXz83OOvLeSC3Jpk4dX3yVAOn8vOTQnn7Nf9M7WBv/5pvE1MDrbv\ntY7qs9IXo8t8CyQhMxffPHGYCkKq36P9CzQnz+uoraeenAL3i+JUZPdt/GbIGWOz\nHLgQiyla4zdqE104OWYcYCWixxcZPlq/WtMf3U4nXF9xPJGBQ0CArLZiAQMJSY5Y\nSrkglXh5QTJYi7PGL2m9mbJQJd6590n3n0NZ92oGa4bSdPH552jkrRpgCXbI9GcF\nnVHngdsF2HzAodwbH87QpuNsHeoD10GQxyKo71g2GQKBgQDUOJVmBRdt1WoEa+VD\nl/WNtqlWwXXPe+BSk4gorFQrXcBPJDCLo4gjN0iw5SwX4zYcbU0AMo8fs9hT/xhA\nYrZ9nkzJ43Sa45IJRaCuutZ5NP9icBWl5g5f2+DymI6C0fLtBWj3ROJCpvhQ9cdH\nxL2ta+2LHhWMArFt5ZFM4P64vQKBgQDGz7WEQALkxvupoKdLldUHiySKQThA00tk\nLRSGtm3rDv95Fn4Uko4NTL/ku2Axawuj/CaFHli5wmvej7gSjbuZWLLeAqthpjDh\nrsbw7K9l6CmL8T05HbC8J5OjbAPX5ekxwsVWL6u8rhDdoV7IfmsW5I9RJf63WUEc\n6Ex1vHmWNwKBgGb1SK3lHHfByRx6CBFiANSO4NrhIrnVnIATaURqTq93XVxH73Ff\nliWXpaGEnX69Ubw63teQr9UumG4v3WEnQufwy8pKmoCmlWwAJrN+m5zUNG5aeHYz\nBZhGAX1QvBsFpniNXl5QQgEaJnCIvPS5o1gme2k54DQ7/j6V2IdWxN11AoGAJwk5\nltIKv2jimRfWQV0WCvkjH5JWvUO/ldfUI+9F/dVgDCKCdv+frLTZKMwxwwJFstkb\npx+iRDcMfxKxDdOOdjmYRUc4519+UZHDtiKC/ftrzPJ9Fu3hedA7iOb4ije2ZfLc\nVGPf0JhM73dz6OIJnOEb0s8nCFEaG9bwzF1JclkCgYBU0pa87Hw8eSKoQ21Jaxf0\nt4+VA4XIGhrL1AfABlvaA4TxRgcAHDTVwjhSulaxeUenE+MCgqJrgHWp1vfuCKQ8\nCr2lrZj8YgiVky5JzrpIV/h9tu3f9zX3abz60oAYePJ5lyUTncz9nLtM+RomekZC\nsdBM10rBYeuP6zOFnkmQ0g==\n-----END PRIVATE KEY-----\n",
+  "client_email": "google-clound-vision-brian@alpr-project-241706.iam.gserviceaccount.com",
+  "client_id": "103746314002606340801",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/google-clound-vision-brian%40alpr-project-241706.iam.gserviceaccount.com"
+}
