@@ -18,62 +18,53 @@ def floodFill(rects, plate_image):
     
     # Take advantage of white background
     # Use floodFill to retrieve more precise contour box
-    
-    # Draw center point of rotated Rect
-    cx, cy = (int(x) for x in rect[0])
-    cv2.circle(plate_image, (cx, cy), 3, (0, 255, 0), -1) # Color and -1 mean filled circle
+    for i, rect in enumerate(rects):
+        # Draw center point of rotated Rect
+        cx, cy = (int(x) for x in rect[0])
+        cv2.circle(plate_image, (cx, cy), 3, (0, 255, 0), -1) # Color and -1 mean filled circle
 
-    w, h = (int(x) for x in rect[1])
-    
-    # Get min size between width and height
-    minSize = w if w < h else h
-    minSize = minSize - minSize*0.5
-    
-    # Init floodFill parameters
-    # Mask need 2 extra pixels
-    mask = np.zeros((Height+2, Width+2), np.uint8)
-    seed_pt = None
-    connectivity = 4 # Fours neighbours floodFill
-    loDiff = 30; upDiff = 30
-    newMaskVal = 255
-    numSeeds = 250
-
-    # Create flags
-    # cv2.FLOODFILL_FIXED_RANGE: if set, the difference between the current pixel and seed pixel is considered (neighbor pixels too)
-    # cv2.FLOODFILL_MASK_ONLY: if set, function dont change the image (newVal is ignored)
-    flags = connectivity + (newMaskVal << 8) + cv2.FLOODFILL_FIXED_RANGE + cv2.FLOODFILL_MASK_ONLY
-    # Generate several seeds near center of rotated rect
-    for j in range(numSeeds):
-        minX = rect[0][0] - minSize/2 - 25 if rect[0][0] - minSize/2 - 25 >= 0 else rect[0][0] - minSize/2
-        maxX = rect[0][0] + (minSize/2) + 25 if rect[0][0] + (minSize/2) + 25 < Width else rect[0][0] + minSize/2
-        minY = rect[0][1] - minSize/2 - 10 if rect[0][1] - minSize/2 - 10 >= 0 else rect[0][1] - minSize/2
-        maxY = rect[0][1] + (minSize/2) + 10 if rect[0][1] + (minSize/2) + 10 < Height else rect[0][1] + (minSize/2)
+        w, h = (int(x) for x in rect[1])
         
-        # print("Size ", w, h)
-
-        # minX = minSize/2
-        # maxX = w - minSize/4
-        # minY = minSize/2
-        # maxY = h - minSize/2
-
-        # Use minSize to generate random seed near center of rect
-        seed_ptX = np.random.randint(minX, maxX)
-        seed_ptY = np.random.randint(minY, maxY)
+        # Get min size between width and height
+        minSize = w if w < h else h
+        minSize = minSize - minSize*0.5
         
-        seed_pt = (seed_ptX, seed_ptY)
-        
-        # If seed value is not 0, pass it
-        if seed_ptX >= Width or seed_ptY >= Height or copy_plate[seed_ptY, seed_ptX] != 0:
-            continue
+        # Init floodFill parameters
+        # Mask need 2 extra pixels
+        mask = np.zeros((Height+2, Width+2), np.uint8)
+        seed_pt = None
+        connectivity = 4 # Fours neighbours floodFill
+        loDiff = 30; upDiff = 30
+        newMaskVal = 255
+        numSeeds = 250
 
-        # Draw seeds and floodFill
-        cv2.circle(plate_image, seed_pt, 1, (0,255,255), -1)
-        # cv2.floodFill(plate_image, mask, seed_pt, (255, 0, 0), loDiff, upDiff, flags)
-        cv2.floodFill(plate_image, mask, seed_pt, 255, loDiff, upDiff, flags)
-        
-    
-    cv2.imshow("Mask", mask)
-    plate_image = np.copy(copy_plate)
+        # Create flags
+        # cv2.FLOODFILL_FIXED_RANGE: if set, the difference between the current pixel and seed pixel is considered (neighbor pixels too)
+        # cv2.FLOODFILL_MASK_ONLY: if set, function dont change the image (newVal is ignored)
+        flags = connectivity + (newMaskVal << 8) + cv2.FLOODFILL_FIXED_RANGE + cv2.FLOODFILL_MASK_ONLY
+        # Generate several seeds near center of rotated rect
+        for j in range(numSeeds):
+            minX = rect[0][0] - minSize/2 - 25 if rect[0][0] - minSize/2 - 25 >= 0 else rect[0][0] - minSize/2
+            maxX = rect[0][0] + (minSize/2) + 25 if rect[0][0] + (minSize/2) + 25 < Width else rect[0][0] + minSize/2
+            minY = rect[0][1] - minSize/2 - 10 if rect[0][1] - minSize/2 - 10 >= 0 else rect[0][1] - minSize/2
+            maxY = rect[0][1] + (minSize/2) + 10 if rect[0][1] + (minSize/2) + 10 < Height else rect[0][1] + (minSize/2)
+            
+            # Use minSize to generate random seed near center of rect
+            seed_ptX = np.random.randint(minX, maxX)
+            seed_ptY = np.random.randint(minY, maxY)
+            
+            seed_pt = (seed_ptX, seed_ptY)
+            
+            # If seed value is not 0, pass it
+            if seed_ptX >= Width or seed_ptY >= Height or copy_plate[seed_ptY, seed_ptX] != 0:
+                continue
+
+            # Draw seeds and floodFill
+            cv2.circle(plate_image, seed_pt, 1, (0,255,255), -1)
+            # cv2.floodFill(plate_image, mask, seed_pt, (255, 0, 0), loDiff, upDiff, flags)
+            cv2.floodFill(plate_image, mask, seed_pt, 255, loDiff, upDiff, flags)
+            
+        cv2.imshow("Mask", mask)
     
     # # Get all point represent foreground
     # pointInterrest = np.where(mask == 255)
@@ -168,26 +159,36 @@ def preprocess_image(found_plate, plate_box):
 
     return refine_contours, mask, threshPlate
 
-def character_separation(mask, contours, threshPlate):
+def character_separation(mask, contours, plate_img):
     character_img = []
+    
     for i, cnt in enumerate(contours):
         # Get bounding box
         (x, y, w, h) = cv2.boundingRect(cnt)
-        
+            
         # character roi
-        character_roi = np.copy(mask[y:y+h, x:x+w])
-        character_roi = cv2.resize(character_roi, None, fx = 0.75, fy = 0.75, interpolation = cv2.INTER_AREA)
+        character_roi = np.copy(plate_img[y:y+h, x:x+w])
+
+        # # gray-scale image
+        # character_roi = cv2.cvtColor(character_roi, cv2.COLOR_BGR2GRAY)
+
+        # Resize
+        # character_roi = cv2.resize(character_roi, None, fx = 0.75, fy = 0.75, interpolation = cv2.INTER_AREA)
         # Make border: 10 extra with constant value = 255
         character_roi = cv2.copyMakeBorder(character_roi, 5, 5, 5, 5, cv2.BORDER_CONSTANT, value = 255)
 
         # Threshold it
         charImg = cv2.GaussianBlur(character_roi, (3,3), 0)
-        charImg = cv2.adaptiveThreshold(charImg, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 5, 2)
+        charImg = cv2.adaptiveThreshold(charImg, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 7, 2)
         
-        # Push to list
-        character_img.append(charImg)
+        # Apply dilation operation:
+        kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (1, 1))
+        openingImg = cv2.morphologyEx(charImg, cv2.MORPH_OPEN, kernel)
 
-        cv2.imshow("{:d}".format(i), charImg)
+        # Push to list
+        character_img.append(openingImg)
+
+        cv2.imshow("Character {:d}".format(i), openingImg)
 
         # Draw bounding box of each character
         rect = cv2.rectangle(mask, (x, y), (x + w, y + h), (0, 255, 0), 2)
@@ -211,26 +212,17 @@ def character_recognition(found_plate, plate_box, img):
             contours[i] = contours[j]
             contours[j] = t
 
-    for cnt in contours:          
-        print(cv2.boundingRect(cnt))            
-
     # Separate character in plate
     character_img = character_separation(mask, contours, threshPlate)
 
     plate_text = ""
-    config = ("-l eng --oem 1 --psm 11")
+    config = ("-l eng --oem 1 --psm 3")
     for i, charImg in enumerate(character_img):
         # Store image in PIL image format
         # pilImg = Image.fromarray(charImg)
         
-        # Apply dilation operation:
-        kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (2, 2))
-        openingImg = cv2.morphologyEx(charImg, cv2.MORPH_OPEN, kernel)
-
-        cv2.imshow("Character " + str(i), openingImg)
-        
         # Recognize text with Tesseract
-        c = image_to_string(openingImg, config = config)
+        c = image_to_string(charImg, config = config)
         c = plate_text.replace(" ", "") # Remove space
 
         if len(c) == 0:
