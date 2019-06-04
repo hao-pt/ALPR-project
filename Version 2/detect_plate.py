@@ -2,7 +2,13 @@ import cv2
 import numpy as np
 from PIL import Image, ImageFilter
 from pytesseract import image_to_string
+import argparse
 
+ap = argparse.ArgumentParser()
+ap.add_argument("-i", "--input", required = True, help = "Path to input image")
+ap.add_argument("-m", "--model", required = False, help = "Path to Haar Cascade pretrained model", default = "GreenParking_num-3000-LBP_mode-ALL_w-30_h-20.xml")
+# ap.add_argument("-o", "--option", required= False, help = "Show step by step", default = "0")
+args = vars(ap.parse_args())
 
 # Use floodFill algorithm for more precise cropping
 def floodFill(rects, plate_image):
@@ -246,36 +252,49 @@ def character_recognition(found_plate, plate_box, img):
     
     print(plate_text)
 
-# Load cascade model
-cascade = cv2.CascadeClassifier(r"E:\K16\Junior\TGMT\ALPR-project\Version 2\GreenParking_num-3000-LBP_mode-ALL_w-30_h-20.xml")
+def main(args):
+    # Measure time
+    e1 = cv2.getTickCount()
 
-# Load image
-img = cv2.imread(r"E:\K16\Junior\TGMT\ALPR-project\Bike_back\8.jpg")
+    # Load cascade model
+    cascade = cv2.CascadeClassifier(args["model"])
 
-# Resize image
-width = 600
-height = int(600 * img.shape[0] / img.shape[1]) 
-img = cv2.resize(img, (width, height))
+    # Load image
+    img = cv2.imread(args["input"])
 
-# Convert to gray image
-grayImg = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    # Resize image
+    width = 600
+    height = int(600 * img.shape[0] / img.shape[1]) 
+    img = cv2.resize(img, (width, height))
 
-# Equalize brightness and increase the contrast
-grayImg = cv2.equalizeHist(grayImg)
+    # Convert to gray image
+    grayImg = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
-# detect license plate
-box_plates = cascade.detectMultiScale(grayImg, scaleFactor = 1.1, minNeighbors = 3, flags = cv2.CASCADE_SCALE_IMAGE)
+    # Equalize brightness and increase the contrast
+    grayImg = cv2.equalizeHist(grayImg)
 
-# Draw bounding box on detected plate
-for (x, y, w, h) in box_plates:
-    # Draw bounding box
-    img = cv2.rectangle(img, (x, y), (x + w, y + h), (0, 0, 255), 2)
-    # Plate roi
-    plate_roi = np.copy(img[y:y+h, x:x + w])
-    cv2.imshow("Plate ROI", plate_roi)
-    # OCR
-    character_recognition(plate_roi, (x, y, w, h), img)
+    # detect license plate
+    box_plates = cascade.detectMultiScale(grayImg, scaleFactor = 1.1, minNeighbors = 3, flags = cv2.CASCADE_SCALE_IMAGE)
 
-# cv2.imshow("Plate detection", img)
-cv2.waitKey(0)
-cv2.destroyAllWindows()
+    # Draw bounding box on detected plate
+    for (x, y, w, h) in box_plates:
+        # Draw bounding box
+        img = cv2.rectangle(img, (x, y), (x + w, y + h), (0, 0, 255), 2)
+        # Plate roi
+        plate_roi = np.copy(img[y:y+h, x:x + w])
+        cv2.imshow("Plate ROI", plate_roi)
+        # OCR
+        character_recognition(plate_roi, (x, y, w, h), img)
+
+    # cv2.imshow("Plate detection", img)
+
+    # End time
+    e2 = cv2.getTickCount()
+    time = (e2 - e1)/cv2.getTickFrequency()
+    print('Time: %.2f(s)' %(time))
+
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
+
+if __name__ == "__main__":
+    main(args)
