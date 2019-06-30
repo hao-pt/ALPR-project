@@ -20,7 +20,7 @@ Those 2 versions don't give the best perfomance comparing with state-of-the-art 
 3. 1612272 Trân Nhât Huy nhathuy13598@gmail.com
 
 ## Documents:
-There are proposal and report file to have you can refer them and get more intuitive. These document was written in Vietnamese.
+There are proposal and report file to have you can refer them and get more intuitive. Moreover, We also have presentation file. These document was written in Vietnamese.
 
 ## Evaluation:
 
