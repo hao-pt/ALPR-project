@@ -12,7 +12,7 @@ We developed 2 versions:
 - Version 2: Process for motor plate in Viet Nam. We used transfer learning methods with pretrained model from https://thigiacmaytinh.com/modelcascade-da-huan-luyen/. Particularly, we used Haar-Cascade Classifier rely on Haar features and use it for detecting license plate region.
 
 More detail, please check it at our proposal and report document.
-Those 2 version doesn't give the best perfomance comparing with state-of-the-art project in related fields. They are just acceptable results. 
+Those 2 versions don't give the best perfomance comparing with state-of-the-art project in related fields. They are just acceptable results. 
 
 ## Team Fusion:
 1. 1612174 Phùng Tiên Hao tienhaophung@gmail.com
