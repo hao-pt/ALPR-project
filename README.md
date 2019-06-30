@@ -22,6 +22,13 @@ Those 2 versions don't give the best perfomance comparing with state-of-the-art 
 ## Documents:
 There are proposal and report file to have you can refer them and get more intuitive. Moreover, We also have presentation file. These document was written in Vietnamese.
 
+## System model:
+### Version 1: Car plate recognition using Handcraft algorithm 
+![Version 1](https://github.com/tienhaophung/ALPR-project/blob/master/diagram.png)
+![Version 1 - Improvement](https://github.com/tienhaophung/ALPR-project/blob/master/diagram_2.png)
+### Version 2: Motobike plate recognition using Haar-Cascade classifier
+![Version 2](https://github.com/tienhaophung/ALPR-project/blob/master/diagram_3.png)
+
 ## Evaluation:
 
 Handcraft algorithm work kind of well and it detect most correct plate region. But in some difficult case such as noise background, scale (too big/small), light (dazzing or too dark) our system is not able to detect plate.
