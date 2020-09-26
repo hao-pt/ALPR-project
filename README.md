@@ -8,8 +8,8 @@ Subject: Introduction to Computer Vision
 Final project: Automatic License Plate Recognition (ALPR)
 
 We developed 2 versions:
-- Version 1: Process for car plate in Europe. Almost based on handcraft algorithm to segment region in image and then extract license plate region. Also we use SVM classifer to class image as Plate or Not. Finally, we use Tesseract library to recognize plate numbers. But I find Tesseract didn't work well with recognizing each single plate character/number, Tesseract just works well with recognizing semantic sentences. Because it use Long Short-Term Memory (LSTM).
-- Version 2: Process for motor plate in Viet Nam. We used transfer learning methods with pretrained model from https://thigiacmaytinh.com/modelcascade-da-huan-luyen/. Particularly, we used Haar-Cascade Classifier rely on Haar features and use it for detecting license plate region.
+- Version 1: Process for car plate in Europe. Almost based on handcraft algorithm to segment region in image and then extract license plate region. Also, we use SVM classifer to class image as Plate or Not. Finally, we use Tesseract library to recognize plate numbers. But I find Tesseract didn't work well with recognizing each single plate character/number, Tesseract just works well with recognizing semantic sentences. Because it use Long Short-Term Memory (LSTM).
+- Version 2: Process for motor plate in Viet Nam. We used transfer learning methods with pretrained model from https://thigiacmaytinh.com/modelcascade-da-huan-luyen/. Particularly, we used Haar-Cascade Classifier relied on Haar features and use it for detecting license plate region.
 
 Those 2 versions don't give the best perfomance comparing with state-of-the-art project in related fields. They are just acceptable results. 
 
