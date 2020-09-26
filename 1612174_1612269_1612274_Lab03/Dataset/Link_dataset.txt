@@ -1,3 +1,0 @@
-﻿Do là upload file nộp lên moodule bị quá tải. Nên là em chỉ giữ lại một số mẫu để test.
-Thầy có thể truy cập link sau đây để lấy nguyên bô dataset mà nhóm em thu thập:
-https://drive.google.com/open?id=1gmQdeiruFp2juXEv1QUK7GQj7q2dxQuJ
