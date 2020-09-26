@@ -1,7 +1,7 @@
 # ALPR-project
 
 ## Introduction:
-University of Sciences
+VNUHCM - University of Science
 
 Subject: Introduction to Computer Vision
 
